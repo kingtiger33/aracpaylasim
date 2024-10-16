@@ -7,23 +7,22 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
             margin: 0;
             padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h1, h2 {
+            color: #333;
         }
 
         .container {
             max-width: 600px;
-            margin: auto;
+            margin: 0 auto;
             background: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        h1, h2 {
-            text-align: center;
-            color: #333;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
         input, select {
@@ -41,9 +40,6 @@
             border: none;
             cursor: pointer;
             transition: background-color 0.3s;
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
         }
 
         button:hover {
@@ -67,6 +63,11 @@
             margin-bottom: 10px;
             background-color: #f9f9f9;
             border-radius: 6px;
+        }
+
+        .ride-item button {
+            width: auto;
+            margin-top: 10px;
         }
 
         .passenger-list {
@@ -94,6 +95,7 @@
                 font-size: 20px;
             }
         }
+
     </style>
 </head>
 <body>
@@ -185,7 +187,7 @@
                 return rideDateTime > now; // Süresi geçmiş araçları kaldır
             });
 
-            rides.forEach((ride) => {
+            rides.forEach((ride, index) => {
                 const rideItem = document.createElement('div');
                 rideItem.classList.add('ride-item');
 
@@ -201,6 +203,9 @@
                 const requestButton = document.createElement('button');
                 requestButton.innerText = 'Araç Talep Et';
                 requestButton.disabled = ride.availableSeats === 0;
+                if (ride.availableSeats === 0) {
+                    requestButton.innerText = 'Dolu';
+                }
 
                 requestButton.addEventListener('click', function () {
                     const passengerName = prompt("Adınızı Girin:");
@@ -247,7 +252,7 @@
 
             // Filtrelenmiş sonuçları göstermek için listeyi yeniden render et
             rideList.innerHTML = `<h2>Mevcut Araçlar</h2>`;
-            filteredRides.forEach((ride) => {
+            filteredRides.forEach((ride, index) => {
                 const rideItem = document.createElement('div');
                 rideItem.classList.add('ride-item');
 
@@ -263,6 +268,9 @@
                 const requestButton = document.createElement('button');
                 requestButton.innerText = 'Araç Talep Et';
                 requestButton.disabled = ride.availableSeats === 0;
+                if (ride.availableSeats === 0) {
+                    requestButton.innerText = 'Dolu';
+                }
 
                 requestButton.addEventListener('click', function () {
                     const passengerName = prompt("Adınızı Girin:");
@@ -295,9 +303,6 @@
                 rideList.appendChild(rideItem);
             });
         }
-
-        // Zaman kontrolü için interval ile araç listesini düzenli olarak yenileme
-        setInterval(renderRides, 60000); // Her dakika bir kez araçları yenile
     </script>
 </body>
 </html>
