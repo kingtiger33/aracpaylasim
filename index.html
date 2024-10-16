@@ -147,7 +147,10 @@
     <script>
         const rideForm = document.getElementById('rideForm');
         const rideList = document.getElementById('rideList');
-        let rides = [];
+        let rides = JSON.parse(localStorage.getItem('rides')) || []; // Yerel depolamadan verileri yükle
+
+        // Sayfa yüklendiğinde mevcut araçları göster
+        window.onload = renderRides;
 
         // Formu gönderme işlemi
         rideForm.addEventListener('submit', function (e) {
@@ -172,6 +175,7 @@
             };
 
             rides.push(ride);
+            localStorage.setItem('rides', JSON.stringify(rides)); // Yerel depolamada güncelle
             renderRides();
             rideForm.reset();
         });
@@ -214,6 +218,7 @@
                     if (passengerName && passengerPhone) {
                         ride.passengers.push({ name: passengerName, phone: passengerPhone });
                         ride.availableSeats -= 1;
+                        localStorage.setItem('rides', JSON.stringify(rides)); // Yerel depolamada güncelle
                         renderRides();
                     }
                 });
@@ -279,6 +284,7 @@
                     if (passengerName && passengerPhone) {
                         ride.passengers.push({ name: passengerName, phone: passengerPhone });
                         ride.availableSeats -= 1;
+                        localStorage.setItem('rides', JSON.stringify(rides)); // Yerel depolamada güncelle
                         renderRides();
                     }
                 });
