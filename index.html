@@ -100,29 +100,24 @@
         </div>
     </div>
 
-   <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAmMp3y3v8TqIRkhuVbkNJoJu_wEIU2XQQ",
+            authDomain: "aracpaylasim.firebaseapp.com",
+            projectId: "aracpaylasim",
+            storageBucket: "aracpaylasim.firebasestorage.app",
+            messagingSenderId: "908438432812",
+            appId: "1:908438432812:web:c02e9bdf736c2c61117589"
+            measurementId: "G-N8GVJTP2TX"
+        };
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "",
-    autAIzaSyAmMp3y3v8TqIRkhuVbkNJoJu_wEIU2XQQhDomain: "aracpaylasim.firebaseapp.com",
-    projectId: "aracpaylasim",
-    storageBucket: "aracpaylasim.firebasestorage.app",
-    messagingSenderId: "908438432812",
-    appId: "1:908438432812:web:c02e9bdf736c2c61117589",
-    measurementId: "G-N8GVJTP2TX"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
         const carForm = document.getElementById('carForm');
         const carList = document.getElementById('carList');
