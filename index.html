@@ -221,7 +221,25 @@
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js"></script>
     <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBG0PTJ8EL7R8vearUw2VQBDyEj1jT5zHY",
+            authDomain: "aracpaylas.firebaseapp.com",
+            projectId: "aracpaylas",
+            storageBucket: "aracpaylas.appspot.com",
+            messagingSenderId: "86543591355",
+            appId: "1:86543591355:web:f33c8e8c9ebbd8ded4f469e",
+            measurementId: "G-ZZ7B0PYP95"
+        };
+
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Kullanıcı Giriş ve Kayıt İşlemleri
         const loginForm = document.getElementById('loginForm');
         const registerForm = document.getElementById('registerForm');
         const logoutButton = document.getElementById('logoutButton');
@@ -232,11 +250,6 @@
         const loginLink = document.getElementById('loginLink');
 
         let currentUser = null;
-        let users = [
-            { username: 'admin', password: 'admin123', phone: 'N/A', approved: true, isAdmin: true },
-        ];
-
-        let rides = [];
 
         registerLink.addEventListener('click', (e) => {
             e.preventDefault();
@@ -251,13 +264,15 @@
         });
 
         logoutButton.addEventListener('click', () => {
-            alert('Çıkış yapıldı!');
-            loginForm.classList.remove('hidden');
-            registerForm.classList.add('hidden');
-            userContent.classList.add('hidden');
-            adminPanel.classList.add('hidden');
-            logoutButton.classList.add('hidden');
-            currentUser = null;
+            auth.signOut().then(() => {
+                alert('Çıkış yapıldı!');
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                userContent.classList.add('hidden');
+                adminPanel.classList.add('hidden');
+                logoutButton.classList.add('hidden');
+                currentUser = null;
+            });
         });
 
         loginForm.addEventListener('submit', (e) => {
@@ -265,99 +280,70 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
-            const user = users.find(u => u.username === username && u.password === password);
-            if (user) {
-                if (!user.approved) {
-                    alert('Hesabınız admin onayı bekliyor.');
-                    return;
-                }
+            auth.signInWithEmailAndPassword(username, password)
+                .then(userCredential => {
+                    currentUser = userCredential.user;
+                    alert('Giriş başarılı!');
+                    loginForm.classList.add('hidden');
+                    logoutButton.classList.remove('hidden');
 
-                currentUser = user;
-                alert('Giriş başarılı!');
-                loginForm.classList.add('hidden');
-                logoutButton.classList.remove('hidden');
-
-                if (user.isAdmin) {
-                    adminPanel.classList.remove('hidden');
-                    renderUserList();
-                } else {
-                    userContent.classList.remove('hidden');
-                }
-            } else {
-                alert('Hatalı kullanıcı adı veya şifre.');
-            }
+                    if (currentUser.email === 'admin@example.com') {
+                        adminPanel.classList.remove('hidden');
+                        renderUserList();
+                    } else {
+                        userContent.classList.remove('hidden');
+                    }
+                })
+                .catch(error => {
+                    alert('Giriş başarısız: ' + error.message);
+                });
         });
 
         registerForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const username = document.getElementById('registerUsername').value;
-            const phone = document.getElementById('registerPhone').value;
+            const email = document.getElementById('registerUsername').value;
             const password = document.getElementById('registerPassword').value;
 
-            if (users.some(user => user.username === username)) {
-                alert('Bu kullanıcı adı zaten alınmış. Lütfen başka bir kullanıcı adı seçin.');
-                return;
-            }
-
-            users.push({ username, password, phone, approved: false, isAdmin: false });
-            alert('Kayıt başarılı! Admin onayını bekleyin.');
-            registerForm.classList.add('hidden');
-            loginForm.classList.remove('hidden');
+            auth.createUserWithEmailAndPassword(email, password)
+                .then(userCredential => {
+                    const user = userCredential.user;
+                    db.collection('users').doc(user.uid).set({
+                        email: email,
+                        phone: document.getElementById('registerPhone').value,
+                        approved: false
+                    });
+                    alert('Kayıt başarılı! Admin onayını bekleyin.');
+                    registerForm.classList.add('hidden');
+                    loginForm.classList.remove('hidden');
+                })
+                .catch(error => {
+                    alert('Kayıt başarısız: ' + error.message);
+                });
         });
-
-        const rideForm = document.getElementById('rideForm');
-        const rideList = document.getElementById('rideList');
-
-        rideForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const location = document.getElementById('rideLocation').value;
-            const date = document.getElementById('rideDate').value;
-            const seats = document.getElementById('rideSeats').value;
-
-            rides.push({ location, date, seats, user: currentUser });
-            renderRides();
-        });
-
-        function renderRides() {
-            rideList.innerHTML = rides.length
-                ? rides.map((ride, index) => `
-                    <div class="ride-item">
-                        <p><strong>Lokasyon:</strong> ${ride.location}</p>
-                        <p><strong>Tarih:</strong> ${ride.date}</p>
-                        <p><strong>Koltuk Sayısı:</strong> ${ride.seats}</p>
-                        <p><strong>Paylaşan:</strong> ${ride.user.username} (${ride.user.phone})</p>
-                        ${ride.user === currentUser ? `<button class="delete-button" onclick="deleteRide(${index})">Sil</button>` : ''}
-                    </div>
-                `).join('')
-                : '<p>Henüz bir paylaşım yok.</p>';
-        }
-
-        function deleteRide(index) {
-            rides.splice(index, 1);
-            renderRides();
-        }
 
         function renderUserList() {
-            userList.innerHTML = users
-                .filter(user => !user.approved && !user.isAdmin)
-                .map(user => `
-                    <div>
-                        <p><strong>Kullanıcı Adı:</strong> ${user.username}</p>
-                        <p><strong>Telefon:</strong> ${user.phone}</p>
-                        <button class="approve-button" onclick="approveUser('${user.username}')">Onayla</button>
-                    </div>
-                `).join('') || '<p>Onay bekleyen kullanıcı yok.</p>';
+            db.collection('users').where('approved', '==', false).get()
+                .then(querySnapshot => {
+                    userList.innerHTML = querySnapshot.docs.map(doc => {
+                        const user = doc.data();
+                        return `
+                            <div>
+                                <p><strong>Kullanıcı Adı:</strong> ${user.email}</p>
+                                <p><strong>Telefon:</strong> ${user.phone}</p>
+                                <button class="approve-button" onclick="approveUser('${doc.id}')">Onayla</button>
+                            </div>
+                        `;
+                    }).join('') || '<p>Onay bekleyen kullanıcı yok.</p>';
+                });
         }
 
-        function approveUser(username) {
-            const user = users.find(u => u.username === username);
-            if (user) {
-                user.approved = true;
-                alert(`${username} adlı kullanıcı onaylandı!`);
-                renderUserList();
-            }
+        function approveUser(userId) {
+            db.collection('users').doc(userId).update({ approved: true })
+                .then(() => {
+                    alert('Kullanıcı onaylandı!');
+                    renderUserList();
+                });
         }
-
     </script>
 </body>
 
