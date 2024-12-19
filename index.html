@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Simple Car Sharing Platform">
+    <meta name="description" content="Güvenli Araç Paylaşım Platformu">
     <meta name="author" content="Your Name">
-    <title>Car Sharing Platform</title>
+    <title>Araç Paylaşım Platformu</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -18,12 +18,34 @@
         }
 
         header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
             background: #4CAF50;
             color: white;
-            padding: 15px;
-            text-align: center;
+            padding: 10px;
             font-size: 24px;
             font-weight: bold;
+            position: relative;
+        }
+
+        .logout-button {
+            background: #f44336;
+            color: white;
+            font-weight: bold;
+            padding: 5px 8px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .logout-button:hover {
+            background: #e53935;
         }
 
         .container {
@@ -46,11 +68,11 @@
 
         input, select, button {
             width: 100%;
-            padding: 10px;
+            padding: 8px;
             margin-bottom: 10px;
             border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
+            border-radius: 3px;
+            font-size: 14px;
         }
 
         button {
@@ -58,119 +80,230 @@
             color: white;
             border: none;
             cursor: pointer;
+            transition: background 0.3s;
         }
 
         button:hover {
             background: #45a049;
         }
 
-        .ride-list {
-            margin-top: 20px;
+        .user-content, .admin-panel {
+            display: none;
         }
 
         .ride-item {
-            padding: 15px;
             border: 1px solid #ccc;
             border-radius: 5px;
+            padding: 10px;
             margin-bottom: 10px;
             background: #f9f9f9;
+            position: relative;
         }
 
-        .ride-item.closed {
-            background: #e0e0e0;
-            color: #777;
+        .delete-button {
+            background: #e53935;
+            color: white;
+            font-size: 10px;
+            border: none;
+            border-radius: 3px;
+            padding: 4px 6px;
+            cursor: pointer;
+            position: absolute;
+            right: 10px;
+            top: 10px;
+        }
+
+        .delete-button:hover {
+            background: #d32f2f;
         }
     </style>
 </head>
 
 <body>
-    <header>Car Sharing Platform</header>
+    <header>
+        Araç Paylaşım Platformu
+        <button id="logoutButton" class="logout-button" style="display:none;">Çıkış Yap</button>
+    </header>
 
     <div class="container">
-        <form id="rideForm">
-            <h2>Create a Ride</h2>
-            <label for="name">Name</label>
-            <input type="text" id="name" name="name" required>
+        <!-- Kullanıcı Giriş ve Kayıt Formu -->
+        <form id="loginForm">
+            <h2>Kullanıcı Girişi</h2>
+            <label for="username">Kullanıcı Adı</label>
+            <input type="text" id="username" name="username" required>
 
-            <label for="location">Location</label>
-            <input type="text" id="location" name="location" required>
+            <label for="password">Şifre</label>
+            <input type="password" id="password" name="password" required>
 
-            <label for="date">Date</label>
-            <input type="date" id="date" name="date" required>
-
-            <label for="time">Time</label>
-            <input type="time" id="time" name="time" required>
-
-            <label for="seats">Seats Available</label>
-            <input type="number" id="seats" name="seats" min="1" required>
-
-            <button type="submit">Share Ride</button>
+            <button type="submit">Giriş Yap</button>
+            <p>Hesabınız yok mu? <a href="#" onclick="showRegisterForm()">Kayıt Ol</a></p>
         </form>
 
-        <div class="ride-list" id="rideList">
-            <h2>Available Rides</h2>
+        <form id="registerForm" style="display:none;">
+            <h2>Kayıt Ol</h2>
+            <label for="registerUsername">Kullanıcı Adı</label>
+            <input type="text" id="registerUsername" name="registerUsername" required>
+
+            <label for="registerPhone">Telefon Numarası</label>
+            <input type="tel" id="registerPhone" name="registerPhone" required>
+
+            <label for="registerPassword">Şifre</label>
+            <input type="password" id="registerPassword" name="registerPassword" required>
+
+            <button type="submit">Kayıt Ol</button>
+        </form>
+
+        <div class="user-content" id="userContent">
+            <h2>Araç Paylaşım ve Talep</h2>
+            <form id="rideForm">
+                <label for="rideLocation">Lokasyon</label>
+                <input type="text" id="rideLocation" name="rideLocation" required>
+
+                <label for="rideDate">Tarih</label>
+                <input type="date" id="rideDate" name="rideDate" required>
+
+                <label for="rideSeats">Koltuk Sayısı</label>
+                <input type="number" id="rideSeats" name="rideSeats" required>
+
+                <button type="submit">Araç Paylaş</button>
+            </form>
+            <div id="rideList">
+                <h3>Mevcut Araç Paylaşımları</h3>
+                <p>Henüz bir paylaşım yok.</p>
+            </div>
+        </div>
+
+        <div class="admin-panel" id="adminPanel">
+            <h2>Admin Paneli</h2>
+            <div class="user-list" id="userList">
+                <h3>Kayıtlı Kullanıcılar</h3>
+            </div>
         </div>
     </div>
 
     <script>
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const logoutButton = document.getElementById('logoutButton');
+        const adminPanel = document.getElementById('adminPanel');
+        const userContent = document.getElementById('userContent');
+        const userList = document.getElementById('userList');
         const rideForm = document.getElementById('rideForm');
         const rideList = document.getElementById('rideList');
+
+        const users = [{ username: 'admin', phone: 'N/A', password: 'admin123', isAdmin: true, approved: true }];
         const rides = [];
 
-        rideForm.addEventListener('submit', (event) => {
-            event.preventDefault();
+        function showRegisterForm() {
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'block';
+        }
 
-            const name = document.getElementById('name').value;
-            const location = document.getElementById('location').value;
-            const date = document.getElementById('date').value;
-            const time = document.getElementById('time').value;
-            const seats = parseInt(document.getElementById('seats').value, 10);
+        function showLoginForm() {
+            registerForm.style.display = 'none';
+            loginForm.style.display = 'block';
+        }
 
-            const ride = {
-                name,
-                location,
-                date,
-                time,
-                seats,
-                requests: []
-            };
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('registerUsername').value;
+            const phone = document.getElementById('registerPhone').value;
+            const password = document.getElementById('registerPassword').value;
 
-            rides.push(ride);
+            users.push({ username, phone, password, isAdmin: false, approved: false });
+            alert('Kayıt başarılı! Admin onayından sonra giriş yapabilirsiniz.');
+            showLoginForm();
+        });
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const user = users.find(u => u.username === username && u.password === password);
+            if (user) {
+                if (!user.approved) {
+                    alert('Hesabınız admin tarafından onaylanmadı. Lütfen daha sonra tekrar deneyin.');
+                    return;
+                }
+                alert('Giriş başarılı!');
+                loginForm.style.display = 'none';
+                logoutButton.style.display = 'block';
+                if (user.isAdmin) {
+                    adminPanel.style.display = 'block';
+                    renderUserList();
+                } else {
+                    userContent.style.display = 'block';
+                }
+            } else {
+                alert('Kullanıcı adı veya şifre hatalı!');
+            }
+        });
+
+        logoutButton.addEventListener('click', () => {
+            alert('Çıkış yapıldı!');
+            loginForm.style.display = 'block';
+            logoutButton.style.display = 'none';
+            adminPanel.style.display = 'none';
+            userContent.style.display = 'none';
+        });
+
+        rideForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const location = document.getElementById('rideLocation').value;
+            const date = document.getElementById('rideDate').value;
+            const seats = document.getElementById('rideSeats').value;
+            const user = users.find(u => u.username === username);
+
+            rides.push({ location, date, seats, username: user.username, phone: user.phone });
             renderRides();
-            rideForm.reset();
         });
 
         function renderRides() {
-            rideList.innerHTML = '<h2>Available Rides</h2>';
+            if (rides.length === 0) {
+                rideList.innerHTML = '<p>Henüz bir paylaşım yok.</p>';
+                return;
+            }
 
+            rideList.innerHTML = '<h3>Mevcut Araç Paylaşımları</h3>';
             rides.forEach((ride, index) => {
                 const rideDiv = document.createElement('div');
-                rideDiv.className = `ride-item ${ride.seats === 0 ? 'closed' : ''}`;
+                rideDiv.className = 'ride-item';
                 rideDiv.innerHTML = `
-                    <p><strong>Name:</strong> ${ride.name}</p>
-                    <p><strong>Location:</strong> ${ride.location}</p>
-                    <p><strong>Date:</strong> ${ride.date}</p>
-                    <p><strong>Time:</strong> ${ride.time}</p>
-                    <p><strong>Seats Available:</strong> ${ride.seats}</p>
-                    ${ride.seats > 0 ? `<button onclick="requestRide(${index})">Request Ride</button>` : '<p>Requests Closed</p>'}
-                    <div class="requests">
-                        <h4>Requests:</h4>
-                        ${ride.requests.map(req => `<p>${req.name} - ${req.contact}</p>`).join('') || '<p>No requests yet</p>'}
-                    </div>
+                    <p><strong>Lokasyon:</strong> ${ride.location}</p>
+                    <p><strong>Tarih:</strong> ${ride.date}</p>
+                    <p><strong>Koltuk Sayısı:</strong> ${ride.seats}</p>
+                    <p><strong>Paylaşan:</strong> ${ride.username} (${ride.phone})</p>
+                    <button class="delete-button" onclick="deleteRide(${index})">Sil</button>
                 `;
                 rideList.appendChild(rideDiv);
             });
         }
 
-        function requestRide(index) {
-            const name = prompt('Enter your name:');
-            const contact = prompt('Enter your contact:');
+        function deleteRide(index) {
+            rides.splice(index, 1);
+            renderRides();
+        }
 
-            if (name && contact) {
-                rides[index].requests.push({ name, contact });
-                rides[index].seats -= 1;
-                renderRides();
-            }
+        function renderUserList() {
+            userList.innerHTML = '<h3>Kayıtlı Kullanıcılar</h3>';
+            users.forEach((user, index) => {
+                if (!user.isAdmin) {
+                    const userDiv = document.createElement('div');
+                    userDiv.className = 'user-item';
+                    userDiv.innerHTML = `
+                        <span>${user.username} - ${user.phone}</span>
+                        ${!user.approved ? `<button class="approve-button" onclick="approveUser(${index})">Onayla</button>` : '<span>Onaylandı</span>'}
+                    `;
+                    userList.appendChild(userDiv);
+                }
+            });
+        }
+
+        function approveUser(index) {
+            users[index].approved = true;
+            renderUserList();
+            alert(`${users[index].username} onaylandı!`);
         }
     </script>
 </body>
